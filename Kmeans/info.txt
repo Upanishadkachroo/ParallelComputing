@@ -1,0 +1,27 @@
+[generate_dataset.py]
+        ↓
+   dataset.csv
+        ↓
+ -----------------------------
+ |                           |
+OpenMP Program            MPI Program
+ |                           |
+Time Output               Time Output
+ |                           |
+run_openmp.sh             run_mpi.sh
+ |                           |
+openmp_results.csv       mpi_results.csv
+        \                 /
+         \               /
+        plot_graph.py
+             ↓
+      openmp.png
+      mpi.png
+
+1. generate_dataset: python3 generate_dataset.py
+2. compile openmp: g++ -fopenmp kmeans_openmp.cpp -o kmeans_openmp
+3. compile mpi: mpicxx kmeans_mpi.cpp -o kmeans_mpi
+4. run bash script: chmod +x run_openmp.sh
+   chmod +x run_mpi.sh both will create respective results.csv
+5. plot the graph accordingly: python3 plot_graph.py
+
