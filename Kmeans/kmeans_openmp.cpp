@@ -16,6 +16,7 @@ int main(int argc, char** argv){
         return 0;
     }
 
+    // imput coming from bash script
     string filename = argv[1];
     int K = stoi(argv[2]);
     int max_iters = stoi(argv[3]);
@@ -23,12 +24,12 @@ int main(int argc, char** argv){
 
     omp_set_num_threads(threads);
 
-    // -------- Read dataset --------
+    // Read dataset
     vector<Point> pts;
     ifstream fin(filename);
     string line;
 
-    getline(fin, line);        // skip header
+    getline(fin, line);//skip the first line
     while(getline(fin, line)){
         if(line.empty()) continue;
         replace(line.begin(), line.end(), ',', ' ');
@@ -40,18 +41,19 @@ int main(int argc, char** argv){
 
     int N = pts.size();
 
-    // -------- Initialize centroids --------
+    // Initialize centroids 
     vector<Point> cent(K);
     for(int i=0;i<K;i++)
         cent[i] = pts[(i*N)/K];
 
     vector<int> label(N, -1);
 
+    // set timer
     auto t1 = chrono::high_resolution_clock::now();
 
-    // ======== K MEANS ITERATIONS ========
+    // loop for itr check
     for(int it=0; it<max_iters; it++){
-
+        //check this
         vector<vector<double>> sumx(threads, vector<double>(K,0));
         vector<vector<double>> sumy(threads, vector<double>(K,0));
         vector<vector<int>> cnt(threads, vector<int>(K,0));
@@ -60,6 +62,7 @@ int main(int argc, char** argv){
 
         #pragma omp parallel
         {
+            // 4 threads created as declared earlier
             int tid = omp_get_thread_num();
 
             #pragma omp for
@@ -67,7 +70,7 @@ int main(int argc, char** argv){
 
                 double best = 1e18;
                 int best_k = 0;
-
+                // kmeans finding best x,y
                 for(int j=0;j<K;j++){
                     double d = dist2(pts[i], cent[j]);
                     if(d < best){
@@ -80,16 +83,18 @@ int main(int argc, char** argv){
 
                 label[i] = best_k;
 
+                // local accumulation to avoid race condition
                 sumx[tid][best_k] += pts[i].x;
                 sumy[tid][best_k] += pts[i].y;
                 cnt[tid][best_k]  += 1;
             }
         }
 
-        // ----- reduce -----
+        
         vector<double> gx(K,0), gy(K,0);
         vector<int> gc(K,0);
 
+        // reduction to combine all threads
         for(int t=0;t<threads;t++){
             for(int j=0;j<K;j++){
                 gx[j]+=sumx[t][j];
@@ -98,7 +103,7 @@ int main(int argc, char** argv){
             }
         }
 
-        // ----- update centroids -----
+        // update centroids 
         for(int j=0;j<K;j++){
             if(gc[j] > 0){
                 cent[j].x = gx[j]/gc[j];
@@ -108,11 +113,11 @@ int main(int argc, char** argv){
 
         if(!changed) break;
     }
-
+    
+    //end time
     auto t2 = chrono::high_resolution_clock::now();
 
-    double time =
-        chrono::duration<double>(t2-t1).count();
+    double time = chrono::duration<double>(t2-t1).count();
 
     cout<<"TIME_SECONDS "<<time<<endl;
 

@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 #include <mpi.h>
 using namespace std;
-
 struct Point { double x, y; };
 
 double dist2(const Point &a, const Point &b){
@@ -34,6 +33,7 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);
     MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+    //check this
     if(argc < 4){
         if(rank==0)
             cout<<"Usage: mpirun -np P ./kmeans_mpi data.csv K max_iters\n";
@@ -50,15 +50,19 @@ int main(int argc, char** argv){
 
     vector<Point> cent(K);
 
+    //check this
     if(rank==0){
         for(int i=0;i<K;i++)
             cent[i] = pts[(i*N)/K];
     }
 
+    // rank 0 sends data to all process
     MPI_Bcast(cent.data(), K*sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
 
+    //time start
     double t1 = MPI_Wtime();
-
+    
+    //check for max iteration
     for(int it=0; it<max_iters; it++){
 
         vector<double> sumx(K,0), sumy(K,0);
@@ -86,6 +90,8 @@ int main(int argc, char** argv){
         vector<double> gx(K), gy(K);
         vector<int> gc(K);
 
+       //distributed reduction
+       //sum of all sumx from all ranks: gx
         MPI_Allreduce(sumx.data(), gx.data(), K, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         MPI_Allreduce(sumy.data(), gy.data(), K, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         MPI_Allreduce(cnt.data(),  gc.data(), K, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -97,6 +103,7 @@ int main(int argc, char** argv){
             }
         }
 
+        // All processes must have same centroids next iteration
         MPI_Bcast(cent.data(), K*sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
     }
 
