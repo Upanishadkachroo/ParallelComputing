@@ -34,8 +34,10 @@ int main(int argc, char** argv){
     MPI_Comm_size(MPI_COMM_WORLD,&size);
 
     //check this
+    //input validation + safe MPI exit
     if(argc < 4){
         if(rank==0)
+            //Only master process prints the message.
             cout<<"Usage: mpirun -np P ./kmeans_mpi data.csv K max_iters\n";
         MPI_Finalize();
         return 0;
@@ -51,9 +53,10 @@ int main(int argc, char** argv){
     vector<Point> cent(K);
 
     //check this
+    //only the master process (rank 0) performs initialization& evry process will have its own pts[]
     if(rank==0){
         for(int i=0;i<K;i++)
-            cent[i] = pts[(i*N)/K];
+            cent[i] = pts[(i*N)/K]; //Pick K initial points evenly spaced from dataset
     }
 
     // rank 0 sends data to all process
@@ -68,13 +71,14 @@ int main(int argc, char** argv){
         vector<double> sumx(K,0), sumy(K,0);
         vector<int> cnt(K,0);
 
-        // each process handles strided part
+        // each process handles strided part, splits data
         for(int i=rank;i<N;i+=size){
-
+            //find nearest point i.e centroid
             double best=1e18;
             int best_k=0;
 
             for(int j=0;j<K;j++){
+                //function call for eucledian distance
                 double d = dist2(pts[i], cent[j]);
                 if(d < best){
                     best=d;

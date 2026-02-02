@@ -1,26 +1,24 @@
+import pandas as pd
 import matplotlib.pyplot as plt
-import csv
 
-def plot(file,x,title,out):
-    xs,ys=[],[]
+o = pd.read_csv("openmp_mm.csv")
+m = pd.read_csv("mpi_mm.csv")
 
-    with open(file) as f:
-        r=csv.DictReader(f)
-        for row in r:
-            xs.append(float(row[x]))
-            ys.append(float(row["time_seconds"]))
+plt.figure()
+plt.plot(o['threads'], o['time'], marker='o')
+plt.xlabel("Number of Threads")
+plt.ylabel("Time (s)")
+plt.title("OpenMP Matrix Multiplication")
+plt.grid()
+plt.savefig("openmp_mm.png")
 
-    plt.figure()
-    plt.plot(xs,ys,marker='o')
-    plt.xlabel(x)
-    plt.ylabel("Time (seconds)")
-    plt.title(title)
-    plt.grid(True)
-    plt.savefig(out)
-    print("Saved:",out)
 
-plot("openmp_mm.csv","threads",
-     "OpenMP Matrix Mul","openmp_mm.png")
+plt.figure()
+plt.plot(m['procs'], m['time'], marker='o')
+plt.xlabel("Number of Processes")
+plt.ylabel("Time (s)")
+plt.title("MPI Matrix Multiplication")
+plt.grid()
+plt.savefig("mpi_mm.png")
 
-plot("mpi_mm.csv","procs",
-     "MPI Matrix Mul","mpi_mm.png")
+print("Graphs saved!")

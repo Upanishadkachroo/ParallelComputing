@@ -54,6 +54,8 @@ int main(int argc, char** argv){
     // loop for itr check
     for(int it=0; it<max_iters; it++){
         //check this
+        //it prevents race conditions by giving each thread its own private accumulation space
+        //sumx[tid][cluster] thread x k
         vector<vector<double>> sumx(threads, vector<double>(K,0));
         vector<vector<double>> sumy(threads, vector<double>(K,0));
         vector<vector<int>> cnt(threads, vector<int>(K,0));
