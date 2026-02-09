@@ -1,0 +1,21 @@
+1. generate the data set from python script
+   python3 generate_matrix.py 800 mat800 800 x 800 matrix is generated for both A and B
+
+2. compile the openmp and mpi programs
+   g++ mm_openmp.cpp -fopenmp -O2 -o mm_openmp
+   mpic++ mm_mpi.cpp -O2 -o mm_mpi
+
+3. chmod +x run_mm.sh
+   run bash automation script which runs this code on on variable number 
+   of threads and preocessors respectively
+   ./run_mm.sh
+
+4. produces necessary graphs of the output of both the programs
+   python3 plot_mm.py
+
+
+Distributes matrix rows across processes using cyclic decomposition and 
+combines partial results via MPI_Allreduce.
+
+Distributes matrix rows across processes using cyclic decomposition and 
+combines partial results via MPI_Allreduce.

@@ -4,6 +4,8 @@ N=600
 A="mat${N}_A.csv"
 B="mat${N}_B.csv"
 
+
+#measures threads vs time 
 echo "threads,time" > openmp_mm.csv
 
 for t in 1 2 4 8 12 16
