@@ -12,12 +12,12 @@ int main(int argc, char* argv[]){
     int token=1;
 
     if(rank!=0){
-        
+        MPI_Recv(&token, 1, MPI_INT, rank-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 
     cout<<"Process"<<rank<<endl;
 
     if(rank!=size -1){
-        
+        MPI_Send(&token, 1, MPI_INT, rank+1, 0, MPI_COMM_WORLD);
     }
 }
